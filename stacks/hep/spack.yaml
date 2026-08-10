@@ -100,7 +100,6 @@ spack:
   - dpmjet
   - edm4hep
   - evtgen +hepmc3 +photos +pythia8 +sherpa +tauola
-  - fairroot
   - fastjet plugins=all
   - feynhiggs
   - fjcontrib
