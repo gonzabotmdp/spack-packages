@@ -122,6 +122,15 @@ class Octave(AutotoolsPackage, GNUMirrorPackage):
     depends_on("llvm", when="+llvm")
     depends_on("gl", when="+opengl")
     depends_on("gl", when="+fltk")
+    # octave's own GUI code (libgui/graphics/gl-select.cc) calls the GL
+    # API directly, but this dependency was missing when +qt is active
+    # without +opengl/+fltk, so the build never had mesa's include/lib
+    # paths and failed with undeclared GL symbols.
+    depends_on("gl", when="+qt")
+    # configure only defines HAVE_OPENGL (and runs the -lGL link check)
+    # if both GL/gl.h AND GL/glu.h are found -- GLU is not part of the
+    # system's opengl package on many distros, so build it via Spack too.
+    depends_on("glu", when="+qt")
     depends_on("qhull", when="+qhull")
     depends_on("qrupdate", when="+qrupdate")
     depends_on("qscintilla", when="+qscintilla")
@@ -327,7 +336,12 @@ class Octave(AutotoolsPackage, GNUMirrorPackage):
         else:
             config_args.append("--disable-java")
 
-        if "~opengl" and "~fltk" in spec:
+        # NOTE: the original condition here was ,
+        # which Python parses as  -- the
+        # non-empty string literal "~opengl" is always truthy, so this always
+        # reduced to just , silently adding --without-opengl
+        # any time ~fltk was set, regardless of +opengl/+qt actually being on.
+        if "~opengl" in spec and "~fltk" in spec and "~qt" in spec:
             config_args.extend(["--without-opengl", "--without-framework-opengl"])
         # TODO:  opengl dependency and package is missing?
 
