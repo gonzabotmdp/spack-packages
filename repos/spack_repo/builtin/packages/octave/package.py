@@ -336,11 +336,12 @@ class Octave(AutotoolsPackage, GNUMirrorPackage):
         else:
             config_args.append("--disable-java")
 
-        # NOTE: the original condition here was ,
-        # which Python parses as  -- the
-        # non-empty string literal "~opengl" is always truthy, so this always
-        # reduced to just , silently adding --without-opengl
-        # any time ~fltk was set, regardless of +opengl/+qt actually being on.
+        # The original condition here was the string "~opengl" ANDed with
+        # the membership test "~fltk" in spec, which Python parses as
+        # bool("~opengl") and ("~fltk" in spec) -- the non-empty string
+        # literal is always truthy, so the check silently collapsed to just
+        # "~fltk" in spec, adding --without-opengl whenever ~fltk was set
+        # regardless of +opengl or +qt actually being active.
         if "~opengl" in spec and "~fltk" in spec and "~qt" in spec:
             config_args.extend(["--without-opengl", "--without-framework-opengl"])
         # TODO:  opengl dependency and package is missing?
