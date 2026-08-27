@@ -99,12 +99,13 @@ class Grace(AutotoolsPackage):
         # legal C89, now -Wimplicit-int), and implicit int/pointer
         # conversions. Downgrade these back to warnings so the build can
         # proceed as it always has on older GCC.
-        env.append_flags(
-            "CFLAGS",
-            "-Wno-error=implicit-function-declaration "
-            "-Wno-error=implicit-int "
-            "-Wno-error=int-conversion",
-        )
+        if self.spec.satisfies("%gcc@14:"):
+            env.append_flags(
+                "CFLAGS",
+                "-Wno-error=implicit-function-declaration "
+                "-Wno-error=implicit-int "
+                "-Wno-error=int-conversion",
+            )
 
     def configure_args(self):
         args = []
