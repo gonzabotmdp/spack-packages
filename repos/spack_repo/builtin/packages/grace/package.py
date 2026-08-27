@@ -90,7 +90,7 @@ class Grace(AutotoolsPackage):
         # configure time via LD_LIBRARY_PATH.
         env.prepend_path("LD_LIBRARY_PATH", self.spec["motif"].prefix.lib)
         env.prepend_path("LD_LIBRARY_PATH", self.spec["libxpm"].prefix.lib)
-        # Newer GCC (13/14) treats several patterns that used to be mere
+        # Newer GCC (14+) treats several patterns that used to be mere
         # warnings as hard errors by default: implicit function
         # declarations (e.g. exit() used without <stdlib.h> -- including
         # in the autoconf-generated conftest.c for the check above, which
