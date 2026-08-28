@@ -122,19 +122,21 @@ class Octave(AutotoolsPackage, GNUMirrorPackage):
     depends_on("llvm", when="+llvm")
     depends_on("gl", when="+opengl")
     depends_on("gl", when="+fltk")
-    # octave's own GUI code (libgui/graphics/gl-select.cc) calls the GL
-    # API directly, but this dependency was missing when +qt is active
-    # without +opengl/+fltk, so the build never had mesa's include/lib
-    # paths and failed with undeclared GL symbols.
-    depends_on("gl", when="+qt")
-    # configure only defines HAVE_OPENGL (and runs the -lGL link check)
-    # if both GL/gl.h AND GL/glu.h are found -- GLU is not part of the
-    # system's opengl package on many distros, so build it via Spack too.
-    depends_on("glu", when="+qt")
     depends_on("qhull", when="+qhull")
     depends_on("qrupdate", when="+qrupdate")
     depends_on("qscintilla", when="+qscintilla")
     depends_on("qt+opengl", when="+qt")
+    # 6/8 (softadm): fix ya validado en el store viejo -- octave's own
+    # GUI code (libgui/graphics/gl-select.cc) llama la API de GL
+    # directamente, pero esta dependencia faltaba cuando +qt esta
+    # activo sin +opengl/+fltk, asi que el build nunca tenia los
+    # include/lib paths de mesa y fallaba con simbolos GL sin declarar.
+    depends_on("gl", when="+qt")
+    # 6/8 (softadm): configure solo define HAVE_OPENGL (y corre el
+    # chequeo de link -lGL) si se encuentran GL/gl.h Y GL/glu.h -- GLU
+    # no es parte del external opengl del sistema (libglu1-mesa-dev no
+    # esta instalado), asi que lo buildeamos via spack en cambio.
+    depends_on("glu", when="+qt")
     depends_on("suite-sparse", when="+suitesparse")
     depends_on("zlib-api", when="+zlib")
 
@@ -336,13 +338,10 @@ class Octave(AutotoolsPackage, GNUMirrorPackage):
         else:
             config_args.append("--disable-java")
 
-        # The original condition here was the string "~opengl" ANDed with
-        # the membership test "~fltk" in spec, which Python parses as
-        # bool("~opengl") and ("~fltk" in spec) -- the non-empty string
-        # literal is always truthy, so the check silently collapsed to just
-        # "~fltk" in spec, adding --without-opengl whenever ~fltk was set
-        # regardless of +opengl or +qt actually being active.
-        if "~opengl" in spec and "~fltk" in spec and "~qt" in spec:
+        # --without-opengl only makes sense when opengl, fltk, and qt are
+        # all disabled (qt+opengl forces GL regardless via the depends_on
+        # above).
+        if spec.satisfies("~opengl~fltk~qt"):
             config_args.extend(["--without-opengl", "--without-framework-opengl"])
         # TODO:  opengl dependency and package is missing?
 
