@@ -126,16 +126,7 @@ class Octave(AutotoolsPackage, GNUMirrorPackage):
     depends_on("qrupdate", when="+qrupdate")
     depends_on("qscintilla", when="+qscintilla")
     depends_on("qt+opengl", when="+qt")
-    # 6/8 (softadm): fix ya validado en el store viejo -- octave's own
-    # GUI code (libgui/graphics/gl-select.cc) llama la API de GL
-    # directamente, pero esta dependencia faltaba cuando +qt esta
-    # activo sin +opengl/+fltk, asi que el build nunca tenia los
-    # include/lib paths de mesa y fallaba con simbolos GL sin declarar.
     depends_on("gl", when="+qt")
-    # 6/8 (softadm): configure solo define HAVE_OPENGL (y corre el
-    # chequeo de link -lGL) si se encuentran GL/gl.h Y GL/glu.h -- GLU
-    # no es parte del external opengl del sistema (libglu1-mesa-dev no
-    # esta instalado), asi que lo buildeamos via spack en cambio.
     depends_on("glu", when="+qt")
     depends_on("suite-sparse", when="+suitesparse")
     depends_on("zlib-api", when="+zlib")
